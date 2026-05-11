@@ -200,21 +200,21 @@
       letter-spacing: -1.5px;
     }
 
-    /* Fluid Animated Gradient Text (Darker Theme) */
+    /* Fluid Animated Gradient Text (Premium Silver & White) */
     .fluid-gradient {
       background: linear-gradient(
         -45deg, 
-        #9ca3af 0%,  /* Slate 400 */
-        #334155 25%, /* Slate 700 */
-        #0f172a 50%, /* Slate 900 */
-        #1e293b 75%, /* Slate 800 */
-        #64748b 100% /* Slate 500 */
+        #ffffff 0%,   /* Pure white */
+        #e2e8f0 25%,  /* Bright silver */
+        #cbd5e1 50%,  /* Cool metallic */
+        #e2e8f0 75%,  /* Bright silver */
+        #ffffff 100%  /* Pure white */
       );
       background-size: 300% 300%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: fluid-gradient-anim 10s ease infinite;
-      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      filter: drop-shadow(0 4px 10px rgba(255, 255, 255, 0.15));
     }
 
     @keyframes fluid-gradient-anim {
