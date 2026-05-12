@@ -81,7 +81,7 @@ const createScene = () => {
     // Add High-Tech glowing neon edges to the cube!
     monolith.enableEdgesRendering();
     monolith.edgesWidth = 15.0;
-    monolith.edgesColor = new Color4(0.0, 0.82, 1.0, 0.8);
+    monolith.edgesColor = new Color4(0.0, 0.0, 0.0, 0.8);
 
     // 2. Focal Portrait Light
     const plLight = new PointLight("portraitLight", new Vector3(0, 5, -15), scene);
@@ -99,8 +99,8 @@ const createScene = () => {
     particleSystem.maxEmitBox = new Vector3(8, -12, -3);
     
     particleSystem.color1 = new Color4(1, 1, 1, 0.8);
-    particleSystem.color2 = new Color4(0.0, 0.82, 1.0, 0.6);
-    particleSystem.colorDead = new Color4(0, 0, 0.2, 0.0);
+    particleSystem.color2 = new Color4(0.0, 0.0, 0.0, 0.6);
+    particleSystem.colorDead = new Color4(0.0, 0.0, 0.0, 0.0);
     
     particleSystem.minSize = 0.05;
     particleSystem.maxSize = 0.15;
@@ -122,6 +122,23 @@ const createScene = () => {
     const navbar = document.querySelector('nav');
     let floatTime = 0;
 
+    let baseRotationX = 0;
+    let baseRotationY = 0;
+    let baseRotationZ = 0;
+
+    // Mouse Tracking Variables
+    let targetTiltX = 0;
+    let targetTiltY = 0;
+    let currentTiltX = 0;
+    let currentTiltY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        // Normalize cursor position between -1 and 1
+        targetTiltY = (e.clientX / window.innerWidth) * 2 - 1;
+        // Invert Y so looking "up" tilts the cube properly
+        targetTiltX = (e.clientY / window.innerHeight) * 2 - 1;
+    });
+
     scene.onBeforeRenderObservable.add(() => {
         const top = document.documentElement.scrollTop || document.body.scrollTop;
         const rectTop = document.body.getBoundingClientRect().top;
@@ -139,10 +156,19 @@ const createScene = () => {
         camera.position.z = (rectTop * 0.01) - 30;
         camera.position.x = (rectTop * 0.0002);
         
-        // Continuous Cinematic Rotation (Like the original shape!)
-        monolith.rotation.y += engine.getDeltaTime() * 0.0005;
-        monolith.rotation.x += engine.getDeltaTime() * 0.0003;
-        monolith.rotation.z += engine.getDeltaTime() * 0.0002;
+        // Continuous Base Rotation
+        baseRotationY += engine.getDeltaTime() * 0.0005;
+        baseRotationX += engine.getDeltaTime() * 0.0003;
+        baseRotationZ += engine.getDeltaTime() * 0.0002;
+
+        // Smoothly interpolate current tilt towards target tilt
+        currentTiltX += (targetTiltX - currentTiltX) * 0.05;
+        currentTiltY += (targetTiltY - currentTiltY) * 0.05;
+
+        // Apply base rotation + mouse tilt parallax
+        monolith.rotation.x = baseRotationX + (currentTiltX * 0.8);
+        monolith.rotation.y = baseRotationY + (currentTiltY * 0.8);
+        monolith.rotation.z = baseRotationZ;
 
         // Cinematic floating up and down
         floatTime += engine.getDeltaTime() * 0.001 * 1.5;
