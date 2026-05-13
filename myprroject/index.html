@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -255,8 +256,8 @@
     }
 
     .hero h1 {
-      font-size: clamp(2.6rem, 6.5vw, 5.5rem);
-      line-height: 1.05;
+      font-size: clamp(2.2rem, 5vw, 4.2rem);
+      line-height: 1.1;
       font-weight: 900;
       margin-bottom: 25px;
       letter-spacing: -1.5px;
@@ -273,6 +274,7 @@
         #ffffff 100%  /* Pure white */
       );
       background-size: 300% 300%;
+      background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: fluid-gradient-anim 10s ease infinite;
@@ -359,6 +361,8 @@
 
     .terminal-header {
       display: flex;
+      /* top: 50px; */
+      /* right: 1px; */
       gap: 8px;
       margin-bottom: 30px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -385,6 +389,56 @@
 
     .code-line span {
       color: #38bdf8;
+    }
+
+    .terminal-ui {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 320px;
+    }
+
+    .terminal-output {
+      flex: 1;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .terminal-line {
+      margin-bottom: 8px;
+    }
+
+    .terminal-line.cmd { color: #f8fafc; }
+    .terminal-line.info { color: #38bdf8; }
+    .terminal-line.success { color: #10b981; }
+    .terminal-line.error { color: #ef4444; }
+
+    .terminal-input-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 10px;
+    }
+
+    .terminal-prompt {
+      color: #38bdf8;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    .terminal-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f8fafc;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.92rem;
     }
 
     .section-title {
@@ -740,6 +794,316 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       transform: translateY(-2px);
     }
+
+    /* Minimalism & Modernism Override */
+    :root {
+      --max-content-width: 970px;
+      --page-padding: clamp(22px, 4.5vw, 72px);
+      --surface: rgba(255, 255, 255, 0.46);
+      --surface-soft: rgba(255, 255, 255, 0.32);
+      --ink: #111111;
+      --ink-muted: #666666;
+      --line: rgba(0, 0, 0, 0.12);
+      --line-strong: rgba(0, 0, 0, 0.18);
+      --accent-min: #1f1f1f;
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: rgba(250, 250, 250, 0.08);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    body::before,
+    body::after {
+      display: none;
+    }
+
+    canvas {
+      filter: grayscale(0.1) contrast(1) saturate(1);
+      opacity: 0.28;
+    }
+
+    nav {
+      background: rgba(255, 255, 255, 0.44);
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      top: 20px;
+    }
+
+    nav ul {
+      gap: 28px;
+    }
+
+    nav ul li a,
+    .text-flip-container {
+      color: #7a7a7a;
+      font-weight: 600;
+    }
+
+    .text-flip-words {
+      color: #111111;
+    }
+
+    nav ul li a:hover {
+      color: var(--ink);
+    }
+
+    .logo-1337 svg path {
+      fill: #1a1a1a;
+    }
+
+    section {
+      padding-top: clamp(88px, 12vh, 150px);
+      padding-bottom: clamp(88px, 12vh, 150px);
+    }
+
+    .hero {
+      gap: clamp(36px, 5vw, 88px);
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.38);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      color: #404040;
+      backdrop-filter: blur(6px);
+      font-weight: 600;
+    }
+
+    .dot {
+      background: #111111;
+      box-shadow: none;
+      animation: none;
+    }
+
+    .fluid-gradient {
+      background: none;
+      -webkit-text-fill-color: #111111;
+      color: #111111;
+      filter: none;
+      animation: none;
+      letter-spacing: -2px;
+    }
+
+    .hero p,
+    .section-subtitle,
+    .project-content p,
+    .contact-box p,
+    .skill-card p {
+      color: var(--ink-muted);
+      text-shadow: none;
+      font-weight: 500;
+    }
+
+    .buttons {
+      gap: 14px;
+    }
+
+    .btn {
+      border-radius: 10px;
+      font-weight: 700;
+      box-shadow: none;
+      padding: 14px 24px;
+      border: 1px solid var(--line-strong);
+    }
+
+    .primary {
+      background: #171717;
+      color: #ffffff;
+      border-color: #171717;
+    }
+
+    .primary:hover {
+      background: #000000;
+      transform: translateY(-1px);
+      box-shadow: none;
+    }
+
+    .secondary {
+      background: rgba(255, 255, 255, 0.34);
+      color: var(--ink);
+      border: 1px solid var(--line-strong);
+      backdrop-filter: blur(6px);
+    }
+
+    .secondary:hover {
+      background: rgba(255, 255, 255, 0.5);
+      border-color: #cbcbcb;
+      transform: translateY(-1px);
+    }
+
+    .glass-card,
+    .skill-card,
+    .project-card,
+    .contact-box {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: none;
+      backdrop-filter: blur(7px);
+    }
+
+    .terminal-header {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+    }
+
+    .code-line {
+      color: #404040;
+      font-family: 'IBM Plex Mono', monospace;
+      margin-bottom: 10px;
+    }
+
+    .code-line span {
+      color: #111111;
+      font-weight: 600;
+    }
+
+    .section-title,
+    .contact-box h2,
+    .hero h1 {
+      color: #111111;
+      letter-spacing: -1.8px;
+      font-weight: 900;
+      text-transform: capitalize;
+    }
+
+    .section-title {
+      margin-bottom: 14px;
+    }
+
+    .skills-grid,
+    .projects {
+      gap: 18px;
+    }
+
+    .skill-card,
+    .project-content,
+    .contact-box {
+      border-radius: 14px;
+    }
+
+    .skill-card {
+      padding: 28px 24px;
+    }
+
+    .skill-card:hover,
+    .project-card:hover {
+      transform: translateY(-2px);
+      border-color: #cfcfcf;
+      box-shadow: none;
+      background: #ffffff;
+    }
+
+    .project-image {
+      background: linear-gradient(180deg, #f5f5f5 0%, #ececec 100%);
+      color: rgba(17, 17, 17, 0.16);
+      letter-spacing: 4px;
+    }
+
+    .project-card:hover .project-image {
+      transform: none;
+      color: rgba(17, 17, 17, 0.2);
+    }
+
+    .project-content {
+      background: rgba(255, 255, 255, 0.58);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(7px);
+    }
+
+    .project-content h3,
+    .contact-box h2,
+    .skill-card h3 {
+      color: #111111;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.4);
+      color: #333333;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .project-links a {
+      color: #222222;
+      opacity: 1;
+      font-weight: 700;
+    }
+
+    .project-links a:hover {
+      color: #000000;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    #github-contributions .glass-card {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--line);
+    }
+
+    footer {
+      background: rgba(255, 255, 255, 0.42);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+
+    footer p,
+    .socials a {
+      color: #6a6a6a;
+    }
+
+    .socials a:hover {
+      color: #111111;
+    }
+
+    /* Center Skills & Expertise */
+    #skills .section-title {
+      text-align: center;
+    }
+
+    #skills .section-subtitle {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Center Featured Projects */
+    #projects .section-title {
+      text-align: center;
+    }
+
+    #projects .section-subtitle {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Center GitHub Contributions */
+    #github-contributions .section-title {
+      text-align: center;
+    }
+
+    #github-contributions .section-subtitle {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 900px) {
+      nav {
+        border-radius: 12px;
+      }
+
+      .hero {
+        gap: 24px;
+      }
+
+      .section-title {
+        font-size: 2.1rem;
+      }
+    }
   </style>
 </head>
 
@@ -820,19 +1184,7 @@
         </div>
       </div>
 
-      <div class="glass-card reveal reveal-delay-3">
-        <div class="terminal-header">
-          <div class="circle red"></div>
-          <div class="circle yellow"></div>
-          <div class="circle green"></div>
-        </div>
-        <div class="code-line">$ whoami</div>
-        <div class="code-line">> <span>software engineering student</span></div>
-        <div class="code-line">> <span>systems programming enthusiast</span></div>
-        <div class="code-line">> <span>unix & backend focused</span></div>
-        <div class="code-line">> <span>building with c/c++, next.js & docker</span></div>
-        <div class="code-line">> <span>1337 / 42 network</span></div>
-      </div>
+      <div id="terminal-mount" class="reveal reveal-delay-3"></div>
     </section>
 
     <section id="skills" class="reveal">
@@ -998,7 +1350,7 @@
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
           </svg>
           <div id="phone-reveal-container" style="max-width: 0; opacity: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center;">
-            <span id="phone-num" style="margin-left: 8px; font-family: monospace; letter-spacing: 0.5px; opacity: 0; transition: opacity 0.3s ease 0.1s; white-space: nowrap;">+212 784 50 87 78</span>
+            <span id="phone-num" style="margin-left: 10px; font-family: monospace; letter-spacing: 1px; opacity: 0; transition: opacity 0.3s ease 0.1s; white-space: nowrap; color: #111111; font-weight: 600; font-size: 0.95rem;">+212 784 50 87 78</span>
           </div>
         </a>
       </div>

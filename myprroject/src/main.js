@@ -1,21 +1,23 @@
 import {
-  Color3,
-  Color4,
-  Engine,
-  FreeCamera,
-  GlowLayer,
-  HemisphericLight,
-  Layer,
-  MeshBuilder,
-  ParticleSystem,
-  PointLight,
-  Scene,
-  StandardMaterial, Texture,
-  Vector3
+    Color3,
+    Color4,
+    Engine,
+    FreeCamera,
+    GlowLayer,
+    HemisphericLight,
+    Layer,
+    MeshBuilder,
+    ParticleSystem,
+    PointLight,
+    Scene,
+    StandardMaterial, Texture,
+    Vector3
 } from '@babylonjs/core';
 import bazghoroImg from './bazghoro.jpg';
+import { Dynamic3DText, TextVisibilityController } from './dynamicText3D.js';
 import spaceBg from './hello.jpg';
 import './style.css';
+import { PortfolioTerminal } from './terminal.js';
 
 const canvas = document.getElementById("bg");
 
@@ -117,6 +119,61 @@ const createScene = () => {
     
     particleSystem.start();
 
+    // --- 3D TEXT RENDERING SYSTEM ---
+    const text3D = new Dynamic3DText(scene, gl);
+    const visibilityController = new TextVisibilityController(scene, camera);
+
+    // Create 3D text for section titles
+    const skillsText = text3D.createGlow3DText(
+      'Skills',
+      new Vector3(-8, 15, -15),
+      2.5,
+      new Color3(0.22, 0.75, 0.95), // Cyan blue
+      'skills-text'
+    );
+
+    const projectsText = text3D.createGlow3DText(
+      'Projects',
+      new Vector3(8, 35, -15),
+      2.5,
+      new Color3(0.4, 0.6, 1), // Indigo
+      'projects-text'
+    );
+
+    const contactText = text3D.createGlow3DText(
+      'Contact',
+      new Vector3(-8, 55, -15),
+      2.5,
+      new Color3(0.6, 0.4, 1), // Purple
+      'contact-text'
+    );
+
+    // Create particle effects around text
+    text3D.createTextParticles(
+      new Vector3(-8, 15, -15),
+      new Color3(0.22, 0.75, 0.95),
+      'skills-particles'
+    );
+
+    text3D.createTextParticles(
+      new Vector3(8, 35, -15),
+      new Color3(0.4, 0.6, 1),
+      'projects-particles'
+    );
+
+    text3D.createTextParticles(
+      new Vector3(-8, 55, -15),
+      new Color3(0.6, 0.4, 1),
+      'contact-particles'
+    );
+
+    // Setup text visibility tracking
+    const textElements = [
+      { element: document.getElementById('skills'), textMesh: skillsText, id: 'skills' },
+      { element: document.getElementById('projects'), textMesh: projectsText, id: 'projects' },
+      { element: document.getElementById('contact'), textMesh: contactText, id: 'contact' },
+    ];
+
     // --- INTERACTIVITY AND ANIMATIONS ---
     let lastScrollTop = 0;
     const navbar = document.querySelector('nav');
@@ -138,6 +195,14 @@ const createScene = () => {
         // Invert Y so looking "up" tilts the cube properly
         targetTiltX = (e.clientY / window.innerHeight) * 2 - 1;
     });
+
+    // Track scroll to update 3D text visibility
+    window.addEventListener('scroll', () => {
+        visibilityController.updateTextVisibility(textElements);
+    });
+
+    // Initial visibility check
+    visibilityController.updateTextVisibility(textElements);
 
     scene.onBeforeRenderObservable.add(() => {
         const top = document.documentElement.scrollTop || document.body.scrollTop;
@@ -179,6 +244,9 @@ const createScene = () => {
 };
 
 const scene = createScene();
+
+const terminal = new PortfolioTerminal();
+terminal.init();
 
 engine.runRenderLoop(() => {
     scene.render();
