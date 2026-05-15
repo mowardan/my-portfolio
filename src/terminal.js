@@ -277,6 +277,7 @@ export class PortfolioTerminal {
 	about() {
 		this.print('Systems programming, backend engineering, Unix architecture.', 'normal');
 	}
+	
 
 	skills() {
 		this.print('C / C++  ·  TypeScript  ·  Python  ·  JavaScript', 'normal');
