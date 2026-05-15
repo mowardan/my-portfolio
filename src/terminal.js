@@ -4,39 +4,25 @@ export class PortfolioTerminal {
 		this.historyIndex = -1;
 		this.isOpen = false;
 		this.commands = {
-			help: () => this.showHelp(),
-			whoami: () => this.whoami(),
-			about: () => this.about(),
-			skills: () => this.skills(),
+			help:     () => this.showHelp(),
+			whoami:   () => this.whoami(),
+			about:    () => this.about(),
+			skills:   () => this.skills(),
 			projects: () => this.projects(),
-			contact: () => this.contact(),
-			github: () => this.github(),
+			contact:  () => this.contact(),
+			github:   () => this.github(),
 			linkedin: () => this.linkedin(),
-			email: () => this.copyEmail(),
-			date: () => this.date(),
-			clear: () => this.clear(),
-		};
-
-		// sync handler for making header/content width "auto"
-		this._syncContentWidth = () => {
-			const panel = document.getElementById('interactive-terminal');
-			if (!panel) return;
-			const chromeInner = panel.querySelector('.pt-chrome-inner');
-			if (!chromeInner) return;
-			const rect = chromeInner.getBoundingClientRect();
-			const computed = Math.max(900, Math.round(rect.width));
-			document.documentElement.style.setProperty('--pt-w', `900px`);
+			email:    () => this.copyEmail(),
+			date:     () => this.date(),
+			clear:    () => this.clear(),
 		};
 	}
 
 	init() {
 		if (document.getElementById('terminal-launcher')) return;
-
 		this.injectStyles();
 
-		document.body.insertAdjacentHTML(
-			'beforeend',
-			`
+		document.body.insertAdjacentHTML('beforeend', `
 			<div class="pt-overlay" id="terminal-overlay" aria-hidden="true"></div>
 
 			<button id="terminal-launcher" class="pt-launcher" aria-label="Open terminal">
@@ -50,11 +36,10 @@ export class PortfolioTerminal {
 
 			<section id="interactive-terminal" class="pt-panel" aria-hidden="true">
 
-				<!-- Chrome bar — exact same width as body -->
 				<div class="pt-chrome">
 					<div class="pt-chrome-inner">
 						<div class="pt-dots">
-							<span class="pt-dot pt-dot--red"  title="Close"></span>
+							<span class="pt-dot pt-dot--red"   title="Close"></span>
 							<span class="pt-dot pt-dot--yellow"></span>
 							<span class="pt-dot pt-dot--green"></span>
 						</div>
@@ -69,15 +54,12 @@ export class PortfolioTerminal {
 					</div>
 				</div>
 
-				<!-- Separator rule -->
 				<div class="pt-rule"></div>
 
-				<!-- Output + input, locked to same width as chrome -->
 				<div class="pt-body">
 					<div class="pt-output" id="terminal-output"></div>
-
 					<div class="pt-input-row">
-						<span class="pt-prompt">
+						<span class="pt-prompt" aria-hidden="true">
 							<span class="pt-prompt-user">amine</span><span class="pt-prompt-at">@</span><span class="pt-prompt-host">portfolio</span><span class="pt-prompt-sep"> ❯</span>
 						</span>
 						<input
@@ -87,24 +69,23 @@ export class PortfolioTerminal {
 							placeholder="type a command…"
 							autocomplete="off"
 							spellcheck="false"
+							aria-label="Terminal input"
 						/>
 					</div>
 				</div>
 
-				<!-- Subtle status bar -->
 				<div class="pt-statusbar">
 					<span class="pt-status-dot"></span>
 					<span id="pt-status-text">ready</span>
 					<span class="pt-status-sep">·</span>
-					<span>tab to complete</span>
-					<span class="pt-status-sep">·</span>
-					<span>↑↓ history</span>
+					<span class="pt-status-hint">tab to complete</span>
+					<span class="pt-status-sep pt-status-hint">·</span>
+					<span class="pt-status-hint">↑↓ history</span>
 					<span class="pt-status-right">ESC to close</span>
 				</div>
 
 			</section>
-			`
-		);
+		`);
 
 		const input    = document.getElementById('terminal-input');
 		const launcher = document.getElementById('terminal-launcher');
@@ -135,7 +116,6 @@ export class PortfolioTerminal {
 				}
 				return;
 			}
-
 			if (e.key === 'Enter') {
 				const value = input.value.trim();
 				if (!value) return;
@@ -161,12 +141,12 @@ export class PortfolioTerminal {
 			else this._setStatus(val ? 'typing…' : 'ready');
 		});
 
-		// Focus trap
+		// Focus trap inside panel
 		document.addEventListener('keydown', (e) => {
 			if (!this.isOpen || e.key !== 'Tab') return;
 			const panel = document.getElementById('interactive-terminal');
 			if (!panel) return;
-			const focusable = panel.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])');
+			const focusable = [...panel.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')];
 			if (!focusable.length) return;
 			const first = focusable[0];
 			const last  = focusable[focusable.length - 1];
@@ -174,21 +154,34 @@ export class PortfolioTerminal {
 			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 		});
 
+		// Reflow panel height when virtual keyboard opens on mobile
+		if (typeof visualViewport !== 'undefined') {
+			visualViewport.addEventListener('resize', () => {
+				if (!this.isOpen) return;
+				const panel = document.getElementById('interactive-terminal');
+				if (!panel) return;
+				const vvh = visualViewport.height;
+				const isMobile = window.innerWidth <= 640;
+				if (isMobile) {
+					panel.style.height = `${Math.min(vvh * 0.78, 560)}px`;
+				}
+			});
+		}
+
 		this._bootSequence();
 	}
 
 	_bootSequence() {
-		const lines = [
-			{ text: 'Welcome — type help to explore.', type: 'muted' },
-		];
-		lines.forEach((l, i) => {
-			setTimeout(() => this.print(l.text, l.type), i * 80);
-		});
+		setTimeout(() => this.print('Welcome — type help to explore.', 'muted'), 0);
 	}
 
 	_setStatus(text) {
 		const el = document.getElementById('pt-status-text');
 		if (el) el.textContent = text;
+	}
+
+	_isMobile() {
+		return window.innerWidth <= 640;
 	}
 
 	open() {
@@ -197,16 +190,13 @@ export class PortfolioTerminal {
 		const input   = document.getElementById('terminal-input');
 		if (!panel || !overlay || !input) return;
 
-		if (window.innerWidth <= 520) {
-			panel.classList.add('mobile');
-			document.documentElement.style.overflow = 'hidden';
-		}
+		panel.classList.toggle('pt-panel--mobile', this._isMobile());
+
+		// Lock body scroll on mobile to prevent background scroll
+		if (this._isMobile()) document.documentElement.style.overflow = 'hidden';
 
 		panel.classList.add('open');
 		overlay.classList.add('open');
-
-		// enforce fixed content width
-		document.documentElement.style.setProperty('--pt-w', '900px');
 		panel.setAttribute('aria-hidden', 'false');
 		panel.setAttribute('role', 'dialog');
 		panel.setAttribute('aria-modal', 'true');
@@ -221,10 +211,9 @@ export class PortfolioTerminal {
 		const overlay = document.getElementById('terminal-overlay');
 		if (!panel || !overlay) return;
 
-		panel.classList.remove('open', 'mobile');
+		panel.classList.remove('open', 'pt-panel--mobile');
+		panel.style.height = '';
 		document.documentElement.style.overflow = '';
-		// ensure content width remains the fixed value
-		document.documentElement.style.setProperty('--pt-w', '900px');
 		overlay.classList.remove('open');
 		panel.setAttribute('aria-hidden', 'true');
 		panel.removeAttribute('role');
@@ -249,7 +238,6 @@ export class PortfolioTerminal {
 		const line = document.createElement('div');
 		line.className = `pt-line pt-line--${type}`;
 		line.textContent = text;
-		// entrance animation
 		line.style.opacity = '0';
 		line.style.transform = 'translateY(4px)';
 		out.appendChild(line);
@@ -277,7 +265,6 @@ export class PortfolioTerminal {
 	about() {
 		this.print('Systems programming, backend engineering, Unix architecture.', 'normal');
 	}
-	
 
 	skills() {
 		this.print('C / C++  ·  TypeScript  ·  Python  ·  JavaScript', 'normal');
@@ -310,8 +297,8 @@ export class PortfolioTerminal {
 		const email = 'amine.wardane999@gmail.com';
 		navigator.clipboard
 			.writeText(email)
-			.then(() => this.print(`Copied to clipboard — ${email}`, 'success'))
-			.catch(() => this.print(`Copy failed. Manual: ${email}`, 'error'));
+			.then(()  => this.print(`Copied to clipboard — ${email}`, 'success'))
+			.catch(()  => this.print(`Copy failed. Manual: ${email}`, 'error'));
 	}
 
 	date() {
@@ -330,7 +317,7 @@ export class PortfolioTerminal {
 		style.textContent = `
 /* ─── Design tokens ─────────────────────────────────────── */
 :root {
-	--pt-bg:           rgba(250, 250, 252, 0.72);
+	--pt-bg:           rgba(250, 250, 252, 0.82);
 	--pt-border:       rgba(0, 0, 0, 0.07);
 	--pt-ink:          #111218;
 	--pt-muted:        #767b8a;
@@ -340,10 +327,13 @@ export class PortfolioTerminal {
 	--pt-rule:         rgba(0, 0, 0, 0.055);
 	--pt-radius:       14px;
 	--pt-chrome-h:     48px;
-	--pt-status-h:     34px;
-	--pt-w:            900px;       /* content column width   */
-	--pt-pad:          28px;        /* horizontal content pad */
+	--pt-status-h:     32px;
 	--pt-font:         'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+	/* Fluid content column: max 900px, shrinks to viewport */
+	--pt-w:            min(900px, 100%);
+	/* Fluid side padding: 28px on desktop, down to 16px on small screens */
+	--pt-pad:          clamp(14px, 3vw, 28px);
 }
 
 /* ─── Overlay ────────────────────────────────────────────── */
@@ -358,10 +348,12 @@ export class PortfolioTerminal {
 }
 .pt-overlay.open { opacity: 1; pointer-events: auto; }
 
-/* ─── Launcher button ────────────────────────────────────── */
+/* ─── Launcher ───────────────────────────────────────────── */
 .pt-launcher {
-	position: fixed; right: 24px; bottom: 24px;
-	width: 56px; height: 56px;
+	position: fixed;
+	right: max(16px, env(safe-area-inset-right, 16px) + 8px);
+	bottom: max(20px, env(safe-area-inset-bottom, 20px) + 4px);
+	width: 54px; height: 54px;
 	border-radius: 50%;
 	background: var(--pt-bg);
 	border: 1px solid var(--pt-border);
@@ -373,12 +365,10 @@ export class PortfolioTerminal {
 	-webkit-backdrop-filter: blur(12px);
 	transition: transform 180ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease;
 	z-index: 1500;
+	touch-action: manipulation;
 }
-.pt-launcher:hover {
-	transform: scale(1.06);
-	box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
-}
-.pt-launcher:active { transform: scale(.97); }
+.pt-launcher:hover  { transform: scale(1.06); box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08); }
+.pt-launcher:active { transform: scale(.96); }
 
 .pt-launcher-pulse {
 	position: absolute;
@@ -395,14 +385,15 @@ export class PortfolioTerminal {
 	100% { opacity: 0; }
 }
 
-/* ─── Panel ──────────────────────────────────────────────── */
+/* ─── Panel — desktop default ────────────────────────────── */
 .pt-panel {
 	position: fixed;
-	right: 24px; bottom: 96px;
+	right: clamp(8px, 2vw, 24px);
+	bottom: clamp(80px, 12vh, 96px);
 
-	/* panel is exactly as wide as the chrome inner box + its own padding */
-	width: calc(var(--pt-w) + var(--pt-pad) * 2);
-	max-width: calc(100vw - 32px);
+	/* Fluid width: fills most of viewport on small screens */
+	width: clamp(300px, 92vw, calc(var(--pt-w) + var(--pt-pad) * 2));
+	max-width: calc(100vw - 16px);
 	height: min(68vh, 620px);
 
 	display: flex; flex-direction: column;
@@ -415,6 +406,7 @@ export class PortfolioTerminal {
 		inset 0 1px 0 rgba(255,255,255,0.7);
 	backdrop-filter: blur(20px) saturate(1.6);
 	-webkit-backdrop-filter: blur(20px) saturate(1.6);
+	overflow: hidden;
 	z-index: 1501;
 
 	opacity: 0;
@@ -423,31 +415,28 @@ export class PortfolioTerminal {
 	transition:
 		opacity 280ms cubic-bezier(.2,.8,.2,1),
 		transform 320ms cubic-bezier(.2,.8,.2,1);
-	overflow: hidden;
 }
 .pt-panel.open {
 	opacity: 1;
 	transform: translateY(0) scale(1);
 	pointer-events: auto;
 }
-.pt-panel.mobile {
-	left: 8px; right: 8px; bottom: 0;
-	width: calc(100% - 16px);
-	max-width: none;
-	height: 64vh;
-	border-radius: var(--pt-radius) var(--pt-radius) 0 0;
-}
 
-/* Noise texture for depth */
-.pt-panel::after {
-	content: '';
-	position: absolute; inset: 0;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
-	background-size: 160px;
-	pointer-events: none;
-	border-radius: inherit;
-	z-index: 0;
+/* ─── Panel — mobile bottom sheet ───────────────────────── */
+.pt-panel--mobile {
+	left: 0; right: 0; bottom: 0;
+	width: 100%;
+	max-width: 100%;
+	/* Leave room above for a tap-to-close affordance */
+	height: clamp(320px, 78vh, 560px);
+	/* Account for iOS home bar */
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+	border-radius: var(--pt-radius) var(--pt-radius) 0 0;
+
+	/* Slide up from bottom */
+	transform: translateY(20px) scale(1);
 }
+.pt-panel--mobile.open { transform: translateY(0) scale(1); }
 
 /* ─── Chrome bar ─────────────────────────────────────────── */
 .pt-chrome {
@@ -457,25 +446,28 @@ export class PortfolioTerminal {
 	padding: 0 var(--pt-pad);
 	position: relative; z-index: 1;
 }
+
+/* Drag handle on mobile */
+.pt-panel--mobile .pt-chrome::before {
+	content: '';
+	position: absolute;
+	top: 8px; left: 50%;
+	transform: translateX(-50%);
+	width: 36px; height: 4px;
+	background: var(--pt-subtle);
+	border-radius: 99px;
+	opacity: 0.5;
+}
+
 .pt-chrome-inner {
 	width: 100%;
 	max-width: var(--pt-w);
 	margin: 0 auto;
 	display: flex; align-items: center; gap: 10px;
 	position: relative;
-	padding: 8px 0; /* vertical padding only; horizontal alignment via max-width */
-}
-
-.pt-chrome-inner::before {
-	content: '';
-	position: absolute;
-	left: 0; right: 0; top: 0; bottom: 0;
+	padding: 8px 12px;
 	background: rgba(255,255,255,0.96);
 	border-radius: 8px;
-	z-index: 0;
-}
-
-.pt-chrome-inner > * { z-index: 1; }
 }
 
 .pt-dots { display: flex; gap: 7px; flex-shrink: 0; }
@@ -496,6 +488,10 @@ export class PortfolioTerminal {
 	color: var(--pt-muted);
 	text-transform: lowercase;
 	user-select: none;
+	/* Hide on very small screens to save space */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 .pt-title-slash { color: var(--pt-accent); margin-right: 1px; }
 
@@ -508,6 +504,7 @@ export class PortfolioTerminal {
 	border-radius: 6px;
 	color: var(--pt-subtle);
 	cursor: pointer;
+	touch-action: manipulation;
 	transition: background 140ms ease, color 140ms ease;
 }
 .pt-close:hover { background: rgba(0,0,0,0.05); color: var(--pt-ink); }
@@ -516,26 +513,18 @@ export class PortfolioTerminal {
 .pt-rule {
 	flex-shrink: 0;
 	height: 1px;
-	background: linear-gradient(
-		90deg,
-		transparent,
-		var(--pt-rule) 20%,
-		var(--pt-rule) 80%,
-		transparent
-	);
+	background: linear-gradient(90deg, transparent, var(--pt-rule) 20%, var(--pt-rule) 80%, transparent);
 	margin: 0 var(--pt-pad);
 	position: relative; z-index: 1;
 }
 
-/* ─── Body (output + input) ──────────────────────────────── */
+/* ─── Body ───────────────────────────────────────────────── */
 .pt-body {
 	flex: 1;
 	display: flex; flex-direction: column;
 	overflow: hidden;
-	padding: 20px var(--pt-pad) 16px;
+	padding: 16px var(--pt-pad) 12px;
 	position: relative; z-index: 1;
-
-	/* align content to the same column as chrome */
 	align-items: center;
 }
 
@@ -545,28 +534,26 @@ export class PortfolioTerminal {
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding-bottom: 8px;
+	/* Momentum scrolling on iOS */
+	-webkit-overflow-scrolling: touch;
 	scroll-behavior: smooth;
 }
-.pt-output::-webkit-scrollbar { width: 5px; }
+.pt-output::-webkit-scrollbar { width: 4px; }
 .pt-output::-webkit-scrollbar-track { background: transparent; }
-.pt-output::-webkit-scrollbar-thumb {
-	background: rgba(0,0,0,0.10);
-	border-radius: 999px;
-}
+.pt-output::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 999px; }
 
-/* ─── Terminal lines ─────────────────────────────────────── */
+/* ─── Lines ──────────────────────────────────────────────── */
 .pt-line {
-	font: 500 0.875rem/1.8 var(--pt-font);
+	font: 500 clamp(0.78rem, 2vw, 0.875rem)/1.8 var(--pt-font);
 	color: var(--pt-ink);
 	padding: 1px 0;
 	word-break: break-word;
 }
-.pt-line + .pt-line { /* small gap between consecutive lines */ }
-.pt-line--cmd       { color: var(--pt-ink); font-weight: 700; margin-top: 12px; }
-.pt-line--muted     { color: var(--pt-subtle); font-size: 0.82rem; }
+.pt-line--cmd       { color: var(--pt-ink); font-weight: 700; margin-top: 10px; }
+.pt-line--muted     { color: var(--pt-subtle); font-size: clamp(0.72rem, 1.8vw, 0.82rem); }
 .pt-line--info      { color: var(--pt-muted); letter-spacing: 0.02em; }
 .pt-line--label     { color: var(--pt-accent); font-weight: 600; margin-top: 6px; }
-.pt-line--highlight { color: var(--pt-accent); font-weight: 700; font-size: 0.95rem; }
+.pt-line--highlight { color: var(--pt-accent); font-weight: 700; font-size: clamp(0.85rem, 2.2vw, 0.95rem); }
 .pt-line--success   { color: #2d9e6b; }
 .pt-line--error     { color: #d94f4f; }
 .pt-line--normal    { color: var(--pt-ink); }
@@ -574,44 +561,48 @@ export class PortfolioTerminal {
 /* ─── Input row ──────────────────────────────────────────── */
 .pt-input-row {
 	width: 100%; max-width: var(--pt-w);
-	display: flex; align-items: center; gap: 10px;
+	display: flex; align-items: center; gap: 8px;
 	margin-top: 8px;
-	padding: 10px 14px;
+	padding: 9px 12px;
 	background: rgba(255,255,255,0.55);
 	border: 1px solid rgba(0,0,0,0.07);
 	border-radius: 8px;
-	box-shadow:
-		0 1px 3px rgba(0,0,0,0.04),
-		inset 0 1px 0 rgba(255,255,255,0.8);
+	box-shadow: 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
 	transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 .pt-input-row:focus-within {
 	border-color: rgba(79, 110, 247, 0.35);
-	box-shadow:
-		0 0 0 3px var(--pt-accent-dim),
-		inset 0 1px 0 rgba(255,255,255,0.8);
+	box-shadow: 0 0 0 3px var(--pt-accent-dim), inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
 .pt-prompt {
-	font: 600 0.82rem/1 var(--pt-font);
+	font: 600 clamp(0.72rem, 1.8vw, 0.82rem)/1 var(--pt-font);
 	flex-shrink: 0;
 	white-space: nowrap;
 	user-select: none;
 }
-.pt-prompt-user   { color: var(--pt-accent); }
-.pt-prompt-at     { color: var(--pt-subtle); }
-.pt-prompt-host   { color: var(--pt-muted); }
-.pt-prompt-sep    { color: var(--pt-accent); margin-left: 6px; }
+.pt-prompt-user { color: var(--pt-accent); }
+.pt-prompt-at   { color: var(--pt-subtle); }
+.pt-prompt-host { color: var(--pt-muted); }
+.pt-prompt-sep  { color: var(--pt-accent); margin-left: 4px; }
+
+/* Hide hostname on tiny screens to keep prompt short */
+@media (max-width: 360px) {
+	.pt-prompt-at,
+	.pt-prompt-host { display: none; }
+}
 
 .pt-input {
 	flex: 1;
 	background: transparent;
 	border: 0;
 	outline: none;
-	font: 500 0.875rem/1 var(--pt-font);
+	font: 500 clamp(0.78rem, 2vw, 0.875rem)/1 var(--pt-font);
 	color: var(--pt-ink);
 	caret-color: var(--pt-accent);
 	min-width: 0;
+	/* Prevent iOS zoom on focus */
+	font-size: max(16px, clamp(0.78rem, 2vw, 0.875rem));
 }
 .pt-input::placeholder { color: var(--pt-subtle); }
 .pt-input::selection   { background: var(--pt-accent-dim); }
@@ -620,9 +611,9 @@ export class PortfolioTerminal {
 .pt-statusbar {
 	flex-shrink: 0;
 	height: var(--pt-status-h);
-	display: flex; align-items: center; gap: 8px;
-	padding: 0 calc(var(--pt-pad) + 14px);   /* matches input-row inner edge */
-	font: 500 0.7rem/1 var(--pt-font);
+	display: flex; align-items: center; gap: 6px;
+	padding: 0 calc(var(--pt-pad) + 12px);
+	font: 500 clamp(0.62rem, 1.6vw, 0.7rem)/1 var(--pt-font);
 	color: var(--pt-subtle);
 	border-top: 1px solid var(--pt-rule);
 	position: relative; z-index: 1;
@@ -636,21 +627,41 @@ export class PortfolioTerminal {
 }
 @keyframes pt-blink {
 	0%, 100% { opacity: 1; }
-	50% { opacity: 0.3; }
+	50%       { opacity: 0.3; }
 }
-.pt-status-sep { opacity: 0.4; }
+.pt-status-sep   { opacity: 0.4; }
 .pt-status-right { margin-left: auto; opacity: 0.55; }
 
-/* ─── Responsive ─────────────────────────────────────────── */
-@media (max-width: 700px) {
-	:root {
-		--pt-w: 100%;
-		--pt-pad: 18px;
+/* ─── Breakpoint: tablet (641–900px) ────────────────────── */
+@media (max-width: 900px) and (min-width: 641px) {
+	.pt-panel {
+		right: 16px;
+		bottom: 88px;
+		height: min(65vh, 560px);
 	}
 }
-@media (max-width: 520px) {
-	.pt-launcher { right: 16px; bottom: 16px; width: 50px; height: 50px; }
-	.pt-panel { right: 8px; left: 8px; bottom: 0; border-radius: var(--pt-radius) var(--pt-radius) 0 0; }
+
+/* ─── Breakpoint: mobile (≤640px) ───────────────────────── */
+@media (max-width: 640px) {
+	:root {
+		--pt-chrome-h: 52px; /* taller for finger targets */
+	}
+
+	/* Hide less-useful hints to save statusbar space */
+	.pt-status-hint { display: none; }
+
+	.pt-launcher {
+		width: 50px; height: 50px;
+	}
+}
+
+/* ─── Breakpoint: tiny (≤360px) ─────────────────────────── */
+@media (max-width: 360px) {
+	:root { --pt-pad: 12px; }
+
+	.pt-title { font-size: 0.68rem; }
+
+	.pt-dot { width: 10px; height: 10px; }
 }
 		`;
 		document.head.appendChild(style);
