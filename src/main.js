@@ -18,6 +18,7 @@ import { Dynamic3DText, TextVisibilityController } from './dynamicText3D.js';
 import spaceBg from './hello.jpg';
 import './style.css';
 import { PortfolioTerminal } from './terminal.js';
+import { renderGitHubSection } from './github.js';
 
 const canvas = document.getElementById("bg");
 
@@ -247,6 +248,8 @@ const scene = createScene();
 
 const terminal = new PortfolioTerminal();
 terminal.init();
+
+renderGitHubSection('mowardan');
 
 engine.runRenderLoop(() => {
     scene.render();
